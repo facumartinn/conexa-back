@@ -1,6 +1,6 @@
 const createError = require('http-errors');
 const path = require('path');
-// const cors = require('cors');
+const cors = require('cors');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
@@ -10,7 +10,8 @@ require('dotenv').config()
 const app = express();
 
 
-// app.use(cors({ origin: true, credentials: true }))
+app.use(cors({ origin: true, credentials: true }))
+app.options('*', cors())
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
