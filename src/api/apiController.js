@@ -1,7 +1,6 @@
 const axios = require('axios');
 const bcrypt = require('bcrypt');
 const { createTokens } = require('./JWT');
-const users = require('../database/Users.json');
 const UserService = require('../services/user.service');
 
 axios.defaults.withCredentials = true;
@@ -10,18 +9,19 @@ module.exports = class controller {
 
     static async registration(req, res) {
 
-        const {username, password} = req.body;
-        const user = users.find(user => user.username === username);
-
+        
         try {
+            const loggedUser = req.body;
+            // Busco si ya existe usuario
+            const user = await UserService.getUser({username: loggedUser.username});
                 if (!user) {
+
                     // Hash de password para guardar en base de datos
-                    const hashedPassword = await bcrypt.hash(password, 10);
+                    const hashedPassword = await bcrypt.hash(loggedUser.password, 10);
                     // Creacion de user nuevo
-                    UserService.createUser(users, {username: username, password: hashedPassword});
+                    UserService.createUser({username: loggedUser.username, password: hashedPassword});
         
                     res.status(200).json({message: "User created!"});
-        
                 } else {
                     res.status(400).json({error: "User already exists."})
                 }
@@ -31,23 +31,27 @@ module.exports = class controller {
     }
     
     static async login(req, res) {
-
-        const {username, password} = req.body;
-        // Busco si existe el user
-        const user = users.find(user => user.username === username);
-
         try {
+            const loggedUser = req.body;
+            // Busco usuario
+            const user = await UserService.getUser({username: loggedUser.username});
+            // console.log(user);
+
                 if (user) {
-                    // Comparo la password del body con la que esta guardada en la base
-                    const matchPasswords = await bcrypt.compare(password, user.password);
+
+                    // Validacion password
+                    const matchPasswords = await bcrypt.compare(loggedUser.password, user.password);
+
                     // Si matchean, se loguea
                     if (matchPasswords) {
 
+                        // Creo JWToken
                         const loginToken = createTokens(user);
-                        // res.status(200).json({"login-token": loginToken});
-                        res.setHeader('set-cookie', `logintoken=${loginToken}; SameSite=None; Secure; max-age=31557600`);
-                        // res.cookie("logintoken", loginToken, { maxAge: 1000 * 60 * 60 * 24, SameSite: 'none', sec"re: true})
-                        res.status(200).json({message: "Logged in!"});
+
+                        // Se crea la cookie con el JWToken
+                        res.setHeader('set-cookie', `logintoken=${loginToken}; SameSite=None; Secure; max-age=31557600`)
+                           .status(200).json({message: "Logged in!"});
+
                     } else {
                         res.status(400).json({error: "Wrong username and/or password."});
                     }
@@ -63,15 +67,16 @@ module.exports = class controller {
     }
 
     static async logout(req, res) {
-        res.cookie("logintoken", "", {maxAge: 1});
-        res.status(200).json({"message": "User logged out."});
+
+        // Borro la cookie con el JWToken
+        res.cookie("logintoken", "", {maxAge: 1})
+           .status(200).json({"message": "User logged out."});
     }
 
     static async getPosts(req, res) {
         // https://jsonplaceholder.typicode.com/posts
-        
-        
         try {
+            // Request a la api para obtener la data
             const response = await axios.get('https://jsonplaceholder.typicode.com/posts');
             return res.json(response.data);
         } catch (error) {
@@ -80,14 +85,12 @@ module.exports = class controller {
 
     }
     static async getPhotos(req, res) {
-        // https://jsonplaceholder.typicode.com/photos
         // https://jsonplaceholder.typicode.com/photos?_start=0&_limit=10
         try {
+            // Request a la api para obtener la data
             const response = await axios.get('https://jsonplaceholder.typicode.com/photos?_start=0&_limit=10');
-            // console.log(response.data)
             return res.json(response.data);
         } catch (error) {
-            // console.log("error")
             console.error(error);
         }
 

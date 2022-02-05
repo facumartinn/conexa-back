@@ -1,28 +1,30 @@
-const fs = require('fs');
-const path = require('path');
+const Users = require('../models/Users');
 
 module.exports = class UserService {
 
-    static async createUser(users, newUser) {
-        
+    static async createUser(data) {
         try {
-            // Push a nuevo user en lista de users
-            users.push(newUser);
-            const userss = users.map((user, i) => {
-                return ({
-                    id: i,
-                    ...user
-                })
-            })
-            const newUserList = JSON.stringify(userss, null, 2);
-            const finished = (error) => {
-                if (error) return;
+            const newUser = {
+                username: data.username,
+                password: data.password
             }
-            // Agrego nuevo usuario a Users.json
-            fs.writeFile(path.resolve('./src/database/Users.json'), newUserList, finished);
+            // Guardo nuevo usuario
+            const response = await new Users(newUser).save();
+            return response;
 
         } catch (error) {
             console.log(error);
         } 
+    }
+
+    static async getUser(data) {
+        try {
+            // Busco usuario para login
+            const loggedUser = await Users.findOne(data);
+            
+            return loggedUser;
+        } catch (error) {
+            console.log(`Could not find user. ${error}`)
+        }
     }
 }

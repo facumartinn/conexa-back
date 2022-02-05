@@ -1,9 +1,9 @@
 const createError = require('http-errors');
-const path = require('path');
 const cors = require('cors');
 const express = require('express');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
+require('./src/config/mongodb.config');
 require('dotenv').config();
 
 
