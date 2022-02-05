@@ -10,7 +10,7 @@ require('dotenv').config();
 const app = express();
 
 app.set("trust proxy", 1);
-app.use(cors({ origin: true, credentials: true }));
+app.use(cors({ origin: true, credentials: true, exposedHeaders: ["set-cookie"] }));
 // app.options('*', cors())
 app.use(logger('dev'));
 app.use(express.json());
