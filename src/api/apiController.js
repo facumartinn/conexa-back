@@ -45,7 +45,7 @@ module.exports = class controller {
 
                         const loginToken = createTokens(user);
                         // res.status(200).json({"login-token": loginToken});
-                        res.cookie("logintoken", loginToken, { maxAge: 1000 * 60 * 60 * 24, secure: true})
+                        res.cookie("logintoken", loginToken, { maxAge: 1000 * 60 * 60 * 24, httpOnly: true, secure: true, SameSite: 'none'})
                         res.status(200).json({message: "Logged in!"});
                     } else {
                         res.status(400).json({error: "Wrong username and/or password."});
