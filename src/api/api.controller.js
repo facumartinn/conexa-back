@@ -2,14 +2,12 @@ const axios = require('axios');
 const bcrypt = require('bcrypt');
 const { createTokens } = require('./JWT');
 const UserService = require('../services/user.service');
-
 axios.defaults.withCredentials = true;
+
 
 module.exports = class controller {
 
     static async registration(req, res) {
-
-        
         try {
             const loggedUser = req.body;
             // Busco si ya existe usuario
