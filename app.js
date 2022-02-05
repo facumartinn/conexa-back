@@ -10,7 +10,7 @@ require('dotenv').config();
 const app = express();
 
 
-app.use(cors({ origin: 'https://conexa-challenge.netlify.app', credentials: true }))
+app.use(cors({ origin: true, credentials: true }));
 // app.options('*', cors())
 app.use(logger('dev'));
 app.use(express.json());
